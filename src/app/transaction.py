@@ -5,16 +5,14 @@ from typing import Union, NoReturn
 tuple_time = (2019, 12, 7, 14, 30, 30, 5, 0, 0)
 init_time = time.asctime(tuple_time)
 
-users = {}
+users = {1: [2000, init_time],
+         2: [3000, init_time],
+         3: [4000, init_time],
+        }
+
 transactions = {}
 reports = {}
 
-def create_base():
-    users[1] = [2000, init_time]
-    users[2] = [3000, init_time]
-    users[3] = [4000, init_time]
-
-create_base()
 
 class Transactions:
     """Класс для работы с транзакциями."""
@@ -36,7 +34,7 @@ class Transactions:
             """Получение даты совершения транзакции."""
             return self._transaction_time
 
-    def create_transaction(self, user_id: int, amount: Union[float, int], trans_type: str):
+    def create_transaction(self, user_id: int, amount: Union[float, int], trans_type: str) -> NoReturn:
         """Создание транзакции."""
         if user_id in users:
             current_balance = users.get(user_id)[0]
@@ -57,14 +55,9 @@ class Transactions:
         else:
             raise ValueError('Error, this user is not exist')
 
-    def get_transaction(self, user_id: int, start: time, end: time) -> list:
+    def get_transaction(self, user_id: int, start: time, end: time) -> dict:
         """Получение транзакции."""
         report = []
-        if start > end:
-            raise ValueError('Error, incorrect time interval')
-        if user_id not in transactions:
-            raise ValueError('Error, this user does not exist')
-
         list_of_trans = transactions.get(user_id)
         for transaction in list_of_trans:
             if transaction.time >= start or transaction.time <= end:
