@@ -1,6 +1,6 @@
 import time
 from dataclasses import dataclass
-from typing import Union, NoReturn
+from typing import Union
 
 tuple_time = (2019, 12, 7, 14, 30, 30, 5, 0, 0)
 init_time = time.asctime(tuple_time)
@@ -10,10 +10,11 @@ transactions = {}
 reports = {}
 
 def create_base():
-    users[1] = [2000, init_time],
-    users[2] = [3000, init_time],
+    users[1] = [2000, init_time]
+    users[2] = [3000, init_time]
     users[3] = [4000, init_time]
 
+create_base()
 
 class Transactions:
     """Класс для работы с транзакциями."""
@@ -63,5 +64,8 @@ class Transactions:
         for transaction in list_of_trans:
             if transaction.time >= start or transaction.time <= end:
                 report.append([transaction.amount, transaction.time])
-                reports.setdefault(id, []).append(report)
+                reports.setdefault(user_id, []).append(report)
         return report
+
+
+Transactions().create_transaction(1, 1000, '+')
