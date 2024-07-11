@@ -5,6 +5,7 @@ from typing import Union
 tuple_time = (2019, 12, 7, 14, 30, 30, 5, 0, 0)
 init_time = time.asctime(tuple_time)
 
+
 users = {}
 transactions = {}
 reports = {}
