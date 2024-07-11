@@ -19,9 +19,15 @@ def create_base():
 
 create_base()
 
+        @property
+        def amount(self) -> Union[float, int]:
+            """Получение текущей суммы транзакции."""
+            return self._current_amount
 
-class Transactions:
-    """Класс для работы с транзакциями."""
+        @property
+        def time(self) -> time:
+            """Получение даты совершения транзакции."""
+            return self._transaction_time
 
     @dataclass
     class Transaction:
@@ -65,6 +71,11 @@ class Transactions:
     def get_transaction(self, user_id: int, start: time, end: time) -> list:
         """Получение транзакции."""
         report = []
+        if start > end:
+            raise ValueError('Error, incorrect time interval')
+        if user_id not in transactions:
+            raise ValueError('Error, this user does not exist')
+
         list_of_trans = transactions.get(user_id)
         for transaction in list_of_trans:
             if transaction.time >= start or transaction.time <= end:
