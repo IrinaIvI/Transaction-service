@@ -17,6 +17,7 @@ def create_base():
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
 
+
 create_base()
 
 
