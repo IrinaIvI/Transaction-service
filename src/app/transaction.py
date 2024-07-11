@@ -57,7 +57,8 @@ class Transactions:
 
             users.get(user_id)[0] = current_balance
 
-            tr = Transactions.Transaction(current_balance, time.ctime(time.time()))
+            trans_time = time.ctime(time.time())
+            tr = Transactions.Transaction(current_balance, trans_time)
             transactions.setdefault(user_id, []).append(tr)
         else:
             raise ValueError('Error, this user is not exist')
@@ -65,6 +66,11 @@ class Transactions:
     def get_transaction(self, user_id: int, start: time, end: time) -> list:
         """Получение транзакции."""
         report = []
+        if start > end:
+            raise ValueError('Error, incorrect time interval')
+        if user_id not in transactions:
+            raise ValueError('Error, this user does not exist')
+
         list_of_trans = transactions.get(user_id)
         for transaction in list_of_trans:
             if transaction.time >= start or transaction.time <= end:
