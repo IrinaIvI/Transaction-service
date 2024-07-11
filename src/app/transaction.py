@@ -9,12 +9,16 @@ users = {}
 transactions = {}
 reports = {}
 
+
 def create_base():
+    """Функция для создания контейнера с данными юзеров."""
     users[1] = [2000, init_time]
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
 
+
 create_base()
+
 
 class Transactions:
     """Класс для работы с транзакциями."""
@@ -52,7 +56,8 @@ class Transactions:
 
             users.get(user_id)[0] = current_balance
 
-            tr = Transactions.Transaction(current_balance, time.ctime(time.time()))
+            trans_time = time.ctime(time.time())
+            tr = Transactions.Transaction(current_balance, trans_time)
             transactions.setdefault(user_id, []).append(tr)
         else:
             raise ValueError('Error, this user is not exist')
