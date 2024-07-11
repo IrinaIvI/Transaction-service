@@ -10,12 +10,15 @@ users = {}
 transactions = {}
 reports = {}
 
+
 def create_base():
+    """Функция создания контейнера с данными юзеров."""
     users[1] = [2000, init_time]
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
 
 create_base()
+
 
 class Transactions:
     """Класс для работы с транзакциями."""
@@ -67,6 +70,3 @@ class Transactions:
                 report.append([transaction.amount, transaction.time])
                 reports.setdefault(user_id, []).append(report)
         return report
-
-
-Transactions().create_transaction(1, 1000, '+')
