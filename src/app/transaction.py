@@ -1,6 +1,6 @@
-from decimal import Decimal
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
 
 init_time = datetime(2019, 12, 7, 14, 30)
 users = {}
@@ -16,6 +16,8 @@ def create_base():
 
 
 create_base()
+
+
 class Transactions:
     """Класс для работы с транзакциями."""
 
@@ -55,8 +57,7 @@ class Transactions:
             tr = Transactions.Transaction(current_balance, datetime.now())
             transactions.setdefault(user_id, []).append(tr)
             return 'Correct operation'
-        else:
-            raise ValueError('Error, this user is not exist')
+        raise ValueError('Error, this user is not exist')
 
     def get_transaction(self, user_id: int, start: datetime, end: datetime) -> list:
         """Получение транзакции."""

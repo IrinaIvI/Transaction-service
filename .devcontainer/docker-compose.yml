@@ -11,7 +11,7 @@ services:
       - ${SSH_KEY_PATH}/id_rsa:/root/.ssh/id_rsa
       - ${SSH_KEY_PATH}/id_rsa.pub:/root/.ssh/id_rsa.pub
     ports:
-      - '28080:8080'
+      - '28082:8082'
     command: sleep infinity
     cap_add:
       - SYS_PTRACE
