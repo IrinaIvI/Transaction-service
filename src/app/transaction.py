@@ -5,13 +5,14 @@ from typing import Union
 tuple_time = (2019, 12, 7, 14, 30, 30, 5, 0, 0)
 init_time = time.asctime(tuple_time)
 
+
 users = {}
 transactions = {}
 reports = {}
 
 
 def create_base():
-    """Функция для создания контейнера с данными юзеров."""
+    """Функция создания контейнера с данными юзеров."""
     users[1] = [2000, init_time]
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
@@ -19,15 +20,9 @@ def create_base():
 
 create_base()
 
-        @property
-        def amount(self) -> Union[float, int]:
-            """Получение текущей суммы транзакции."""
-            return self._current_amount
 
-        @property
-        def time(self) -> time:
-            """Получение даты совершения транзакции."""
-            return self._transaction_time
+class Transactions:
+    """Класс для работы с транзакциями."""
 
     @dataclass
     class Transaction:
@@ -82,6 +77,3 @@ create_base()
                 report.append([transaction.amount, transaction.time])
                 reports.setdefault(user_id, []).append(report)
         return report
-
-
-Transactions().create_transaction(1, 1000, '+')
