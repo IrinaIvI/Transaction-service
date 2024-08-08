@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
-init_time = datetime(2019, 12, 7, 14, 30)
+init_time = datetime(2019, 12, 7, 14, 30).strftime('%Y-%m-%dT%H:%M:%S')
 users = {}
 transactions = {}
 reports = {}
@@ -54,7 +54,7 @@ class Transactions:
 
             users.get(user_id)[0] = current_balance
 
-            tr = Transactions.Transaction(current_balance, datetime.now())
+            tr = Transactions.Transaction(current_balance, datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
             transactions.setdefault(user_id, []).append(tr)
             return 'Correct operation'
         raise ValueError('Error, this user is not exist')
