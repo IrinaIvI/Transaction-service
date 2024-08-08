@@ -67,7 +67,7 @@ class Transactions:
         report = []
         list_of_trans = transactions.get(user_id)
         for transaction in list_of_trans:
-            if transaction.time >= start.strftime('%Y-%m-%dT%H:%M:%S') or transaction.time <= end.strftime('%Y-%m-%dT%H:%M:%S'):
+            if transaction.time >= start or transaction.time <= end:
                 report.append([transaction.amount, transaction.time])
                 reports.setdefault(user_id, []).append(report)
             else:
