@@ -66,6 +66,11 @@ class Transactions:
     def get_transaction(self, user_id: int, start: datetime, end: datetime) -> list:
         """Получение транзакции."""
         report = []
+        if start > end:
+            raise ValueError('Error, incorrect time interval')
+        if user_id not in transactions:
+            raise ValueError('Error, this user does not exist')
+
         list_of_trans = transactions.get(user_id)
         for transaction in list_of_trans:
             if transaction.time >= start or transaction.time <= end:
