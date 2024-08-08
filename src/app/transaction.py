@@ -58,7 +58,7 @@ class Transactions:
 
             users.get(user_id)[0] = current_balance
 
-            tr = Transactions.Transaction(current_balance, datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+            tr = Transactions.Transaction(current_balance, datetime.now())
             transactions.setdefault(user_id, []).append(tr)
             return 'Correct operation'
         raise ValueError('Error, this user is not exist')
