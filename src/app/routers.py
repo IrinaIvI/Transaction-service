@@ -3,12 +3,11 @@ from typing import Annotated
 from decimal import Decimal
 from datetime import datetime
 
-from app.transaction import Transactions
+from app.transaction import Transactions, create_base
 
 router = APIRouter(
     prefix="/transaction_service",
 )
-
 
 @router.post('/create_transaction')
 def create_transaction(result: Annotated[int, Decimal, str, Depends(Transactions().create_transaction)]):
@@ -18,3 +17,7 @@ def create_transaction(result: Annotated[int, Decimal, str, Depends(Transactions
 def get_transaction(report: Annotated[int, datetime, datetime, Depends(Transactions().get_transaction)]):
     return report
 
+@router.get('/create_base')
+def router_create_base():
+    create_base()
+    return "База очищена и создана"
