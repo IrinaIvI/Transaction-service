@@ -1,11 +1,8 @@
-import time
 from dataclasses import dataclass
-from typing import Union
+from datetime import datetime
+from decimal import Decimal
 
-tuple_time = (2019, 12, 7, 14, 30, 30, 5, 0, 0)
-init_time = time.asctime(tuple_time)
-
-
+init_time = datetime(2019, 12, 7, 14, 30).strftime('%Y-%m-%dT%H:%M:%S')
 users = {}
 transactions = {}
 reports = {}
@@ -13,6 +10,10 @@ reports = {}
 
 def create_base():
     """Функция создания контейнера с данными юзеров."""
+    transactions.clear()
+    reports.clear()
+    users.clear()
+
     users[1] = [2000, init_time]
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
@@ -28,42 +29,41 @@ class Transactions:
     class Transaction:
         """Класс транзакции."""
 
-        _current_amount: Union[float, int] = 0
-        _transaction_time: time = init_time
+        _current_amount: Decimal = 0
+        _transaction_time: datetime = init_time
 
         @property
-        def amount(self) -> Union[float, int]:
+        def amount(self) -> Decimal:
             """Получение текущей суммы транзакции."""
             return self._current_amount
 
         @property
-        def time(self) -> time:
+        def time(self) -> datetime:
             """Получение даты совершения транзакции."""
             return self._transaction_time
 
-    def create_transaction(self, user_id: int, amount: Union[float, int], trans_type: str):
+    def create_transaction(self, user_id: int, amount: Decimal, operation: str):
         """Создание транзакции."""
         if user_id in users:
             current_balance = users.get(user_id)[0]
             if amount < 0:
                 raise ValueError('Error, incorrect amount')
             else:
-                if trans_type == '+':
+                if operation == '+':
                     current_balance += amount
-                elif trans_type == '-' and current_balance >= amount:
+                elif operation == '-' and current_balance >= amount:
                     current_balance -= amount
                 else:
                     raise ValueError('Error, incorrect operation')
 
             users.get(user_id)[0] = current_balance
 
-            trans_time = time.ctime(time.time())
-            tr = Transactions.Transaction(current_balance, trans_time)
+            tr = Transactions.Transaction(current_balance, datetime.now())
             transactions.setdefault(user_id, []).append(tr)
-        else:
-            raise ValueError('Error, this user is not exist')
+            return 'Correct operation'
+        raise ValueError('Error, this user is not exist')
 
-    def get_transaction(self, user_id: int, start: time, end: time) -> list:
+    def get_transaction(self, user_id: int, start: datetime, end: datetime) -> list:
         """Получение транзакции."""
         report = []
         if start > end:
@@ -76,4 +76,6 @@ class Transactions:
             if transaction.time >= start or transaction.time <= end:
                 report.append([transaction.amount, transaction.time])
                 reports.setdefault(user_id, []).append(report)
+            else:
+                return 'There is no any report'
         return report
