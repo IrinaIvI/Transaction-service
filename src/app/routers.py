@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 from decimal import Decimal
 from datetime import datetime
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse(status_code=200, content={"message": "success"})
 
 from app.transaction import Transactions, create_base
 
@@ -25,4 +25,4 @@ def router_create_base():
 
 @router.get('/health/ready')
 async def health_check():
-    return JSONResponse(status_code=200, details='succes')
+    return JSONResponse(status_code=200, content={"message": "success"})
