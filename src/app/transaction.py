@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
-init_time = datetime(2019, 12, 7, 14, 30)
+init_time = datetime(2019, 12, 7, 14, 30).strftime('%Y-%m-%dT%H:%M:%S')
 users = {}
 transactions = {}
 reports = {}
@@ -10,6 +10,10 @@ reports = {}
 
 def create_base():
     """Функция создания контейнера с данными юзеров."""
+    transactions.clear()
+    reports.clear()
+    users.clear()
+
     users[1] = [2000, init_time]
     users[2] = [3000, init_time]
     users[3] = [4000, init_time]
