@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 from decimal import Decimal
 from datetime import datetime
+from fastapi.responses import JSONResponse
 
 from app.transaction import Transactions, create_base
 
@@ -21,3 +22,7 @@ def get_transaction(report: Annotated[int, datetime, datetime, Depends(Transacti
 def router_create_base():
     create_base()
     return "База очищена и создана"
+
+@router.get('/health/ready')
+async def health_check():
+    return JSONResponse(status_code=200, details='succes')
