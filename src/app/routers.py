@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 from decimal import Decimal
 from datetime import datetime
-from fastapi.responses import JSONResponse(status_code=200, content={"message": "success"})
+from fastapi.responses import JSONResponse
 
 from app.transaction import Transactions, create_base
 
