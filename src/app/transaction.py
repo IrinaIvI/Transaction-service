@@ -66,11 +66,23 @@ class Transactions:
     def get_transaction(self, user_id: int, start: datetime, end: datetime) -> list:
         """Получение транзакции."""
         report = []
-        list_of_trans = transactions.get(user_id)
+        list_of_trans = transactions.get(user_id, [])
         for transaction in list_of_trans:
-            if transaction.time >= start or transaction.time <= end:
+            if start <= transaction.time <= end:
                 report.append([transaction.amount, transaction.time])
-                reports.setdefault(user_id, []).append(report)
-            else:
-                return 'There is no any report'
-        return report
+
+        if report:
+            reports.setdefault(user_id, []).append(report)
+            return report
+        else:
+            return 'There is no any report'
+        # """Получение транзакции."""
+        # report = []
+        # list_of_trans = transactions.get(user_id)
+        # for transaction in list_of_trans:
+        #     if transaction.time >= start and transaction.time <= end:
+        #         report.append([transaction.amount, transaction.time])
+        #         reports.setdefault(user_id, []).append(report)
+        #     else:
+        #         return 'There is no any report'
+        # return report
