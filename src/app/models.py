@@ -13,13 +13,10 @@ class Account(Base):
     __tablename__ = "account"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     balance = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
     updated_at = Column(TIMESTAMP, default=None)
-
-    user = relationship("User", back_populates="account")
-    transactions = relationship("Transactions", back_populates="account")
 
 class Transactions(Base):
     __tablename__ = "transactions"
@@ -30,5 +27,3 @@ class Transactions(Base):
     type = Column(Enum(TransactionType), nullable=False)
     balance_after = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
-
-    account = relationship("Account", back_populates="transactions")
