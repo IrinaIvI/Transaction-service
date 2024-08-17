@@ -10,19 +10,21 @@ class TransactionType(PyEnum):
     CREDIT = "CREDIT"
 
 class Account(Base):
-    __tablename__ = "account"
+    __tablename__ = "account_ivashko"
+    __table_args__ = {"schema": "transaction_ivashko"}
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users_ivashko.id'))
     balance = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
     updated_at = Column(TIMESTAMP, default=None)
 
 class Transactions(Base):
-    __tablename__ = "transactions"
+    __tablename__ = "transactions_ivashko"
+    __table_args__ = {"schema": "transaction_ivashko"}
 
     id = Column(Integer, primary_key=True)
-    account_id = Column(Integer, ForeignKey('account.id'))
+    account_id = Column(Integer, ForeignKey('transaction_ivashko.account_ivashko.id'))
     amount = Column(BIGINT, nullable=False)
     type = Column(Enum(TransactionType), nullable=False)
     balance_after = Column(BIGINT, nullable=False)
