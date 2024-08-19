@@ -1,88 +1,104 @@
-from dataclasses import dataclass
+#from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-
-init_time = datetime(2019, 12, 7, 14, 30).strftime('%Y-%m-%dT%H:%M:%S')
-users = {}
-transactions = {}
-reports = {}
-
-
-def create_base():
-    """Функция создания контейнера с данными юзеров."""
-    transactions.clear()
-    reports.clear()
-    users.clear()
-
-    users[1] = [2000, init_time]
-    users[2] = [3000, init_time]
-    users[3] = [4000, init_time]
-
-
-create_base()
+import logging
+from app.models import AccountModel, TransactionsModel
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from typing import Annotated
+from fastapi import Depends, HTTPException
+from app.database import get_db
 
 
 class Transactions:
     """Класс для работы с транзакциями."""
 
-    @dataclass
-    class Transaction:
-        """Класс транзакции."""
-
-        _current_amount: Decimal = 0
-        _transaction_time: datetime = init_time
-
-        @property
-        def amount(self) -> Decimal:
-            """Получение текущей суммы транзакции."""
-            return self._current_amount
-
-        @property
-        def time(self) -> datetime:
-            """Получение даты совершения транзакции."""
-            return self._transaction_time
-
-    def create_transaction(self, user_id: int, amount: Decimal, operation: str):
-        """Создание транзакции."""
-        if user_id in users:
-            current_balance = users.get(user_id)[0]
-            if amount < 0:
-                raise ValueError('Error, incorrect amount')
+    def create_account(self, user_id: int, db: Annotated[Session, Depends(get_db)]):
+        """Создание аккаунта пользователя."""
+        try:
+            # Проверяем, существует ли уже аккаунт для данного пользователя
+            existing_account = db.query(AccountModel).filter(AccountModel.user_id == user_id).one_or_none()
+            if existing_account is None:
+                # Создаем новый аккаунт
+                new_account = AccountModel(
+                    user_id=user_id,
+                    balance=0,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now()
+                )
+                db.add(new_account)
+                db.commit()
+                logging.info(f"Создан новый аккаунт для пользователя {user_id} с балансом 0")
             else:
-                if operation == '+':
-                    current_balance += amount
-                elif operation == '-' and current_balance >= amount:
-                    current_balance -= amount
-                else:
-                    raise ValueError('Error, incorrect operation')
+                logging.info(f"Аккаунт для пользователя {user_id} уже существует")
+        except Exception as e:
+            db.rollback()
+            logging.error(f"Ошибка при создании аккаунта: {e}")
+            return 'Ошибка при создании аккаунта'
 
-            users.get(user_id)[0] = current_balance
+    def create_transaction(self, user_id: int, amount: Decimal, operation: str, db: Annotated[Session, Depends(get_db)]):
+        """Создание транзакции."""
+        account = db.query(AccountModel).filter(AccountModel.user_id == user_id).first()
+        if not account:
+            self.create_account(user_id, db)
+        if amount < 0:
+            raise HTTPException(status_code=400, detail="Сумма меньше нуля")
+        verified_query = text("""SELECT verified FROM auth_schema_ivashko.users_ivashko
+                        WHERE id = :user_id;""")
+        result = db.execute(verified_query, {'user_id': user_id})
+        verified_user_row = result.fetchone()
+        if verified_user_row is None:
+            return ValueError(f"Пользователь с айди {user_id} не найден")
+        verified_user = verified_user_row[0]
+        db.commit()
+        if operation == 'DEBIT':
+            new_balance = account.balance + amount
+        elif account.balance >= amount or verified_user:
+            new_balance = account.balance - amount
+        else:
+            raise HTTPException(status_code=400, detail="Недостаточно средств на балансе и пользователь не верифицирован")
 
-            tr = Transactions.Transaction(current_balance, datetime.now())
-            transactions.setdefault(user_id, []).append(tr)
-            return 'Correct operation'
-        raise ValueError('Error, this user is not exist')
+        update_query = text("""
+            UPDATE transaction_ivashko.account_ivashko
+            SET balance = :new_balance, updated_at = :updated_at
+            WHERE user_id = :user_id
+        """)
+        db.execute(update_query, {
+            'new_balance': new_balance,
+            'updated_at': datetime.now(),
+            'user_id': user_id
+        })
 
-    def get_transaction(self, user_id: int, start: datetime, end: datetime) -> list:
+        insert_transaction_query = text("""
+            INSERT INTO transaction_ivashko.transactions_ivashko
+            (account_id, amount, "type", balance_after, created_at)
+            VALUES (:account_id, :amount, :type, :balance_after, :created_at)
+        """)
+        db.execute(insert_transaction_query, {
+            'account_id': account.id,
+            'amount': amount,
+            'type': operation,
+            'balance_after': new_balance,
+            'created_at': datetime.now()
+        })
+        db.commit()
+        logging.info(f"Транзакция успешно проведена для пользователя {user_id}")
+        return 'Операция корректная'
+
+
+    def get_transaction(self, user_id: int, start: datetime, end: datetime, db: Annotated[Session, Depends(get_db)]) -> list:
         """Получение транзакции."""
-        report = []
-        list_of_trans = transactions.get(user_id, [])
-        for transaction in list_of_trans:
-            if start <= transaction.time <= end:
-                report.append([transaction.amount, transaction.time])
+        account = db.query(AccountModel).filter(AccountModel.user_id == user_id).first()
+        list_of_trans = db.query(TransactionsModel).filter(
+            TransactionsModel.account_id == account.id,
+            TransactionsModel.created_at >= start,
+            TransactionsModel.created_at <= end
+            ).all()
+
+        # Формируем отчет
+        report = [[transaction.amount, transaction.created_at] for transaction in list_of_trans]
 
         if report:
-            reports.setdefault(user_id, []).append(report)
             return report
         else:
-            return 'There is no any report'
-        # """Получение транзакции."""
-        # report = []
-        # list_of_trans = transactions.get(user_id)
-        # for transaction in list_of_trans:
-        #     if transaction.time >= start and transaction.time <= end:
-        #         report.append([transaction.amount, transaction.time])
-        #         reports.setdefault(user_id, []).append(report)
-        #     else:
-        #         return 'There is no any report'
-        # return report
+            return 'There are no transactions for the specified period'

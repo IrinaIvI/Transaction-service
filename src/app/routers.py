@@ -4,7 +4,7 @@ from decimal import Decimal
 from datetime import datetime
 from fastapi.responses import JSONResponse
 
-from app.transaction import Transactions, create_base
+from app.transaction import Transactions
 
 router = APIRouter(
     prefix="/transaction_service",
@@ -18,10 +18,10 @@ def create_transaction(result: Annotated[int, Decimal, str, Depends(Transactions
 def get_transaction(report: Annotated[int, datetime, datetime, Depends(Transactions().get_transaction)]):
     return report
 
-@router.get('/create_base')
-def router_create_base():
-    create_base()
-    return "База очищена и создана"
+# @router.get('/create_base')
+# def router_create_base():
+#     create_base()
+#     return "База очищена и создана"
 
 @router.get('/health/ready')
 async def health_check():

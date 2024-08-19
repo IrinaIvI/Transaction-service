@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, text
 from sqlalchemy import pool
 import os
 import sys
@@ -12,10 +12,8 @@ from alembic import context
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-database_url = "postgresql+psycopg2://postgres:password@localhost:5433/card_app"
-if not database_url:
-    raise ValueError("DATABASE_URL environment variable not set or is empty")
-config.set_main_option("sqlalchemy.url", database_url)
+# database_url = "postgresql+psycopg2://postgres:password@localhost:5432/card_app"
+# config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -71,6 +69,8 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        #connection.execute(text("CREATE SCHEMA IF NOT EXISTS transaction_ivashko"))
+
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
