@@ -5,9 +5,10 @@ import logging
 from app.models import AccountModel, TransactionsModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, Union, List
 from fastapi import Depends, HTTPException
 from app.database import get_db
+from app.schemas import ReportScheme
 
 
 class Transactions:
@@ -16,10 +17,8 @@ class Transactions:
     def create_account(self, user_id: int, db: Annotated[Session, Depends(get_db)]):
         """Создание аккаунта пользователя."""
         try:
-            # Проверяем, существует ли уже аккаунт для данного пользователя
             existing_account = db.query(AccountModel).filter(AccountModel.user_id == user_id).one_or_none()
             if existing_account is None:
-                # Создаем новый аккаунт
                 new_account = AccountModel(
                     user_id=user_id,
                     balance=0,
@@ -48,7 +47,7 @@ class Transactions:
         result = db.execute(verified_query, {'user_id': user_id})
         verified_user_row = result.fetchone()
         if verified_user_row is None:
-            return ValueError(f"Пользователь с айди {user_id} не найден")
+            raise HTTPException(status_code=400, detail=f"Пользователь с айди {user_id} не найден")
         verified_user = verified_user_row[0]
         db.commit()
         if operation == 'DEBIT':
@@ -82,11 +81,10 @@ class Transactions:
             'created_at': datetime.now()
         })
         db.commit()
-        logging.info(f"Транзакция успешно проведена для пользователя {user_id}")
-        return 'Операция корректная'
+        return {'status': 'Операция корректная'}
 
 
-    def get_transaction(self, user_id: int, start: datetime, end: datetime, db: Annotated[Session, Depends(get_db)]) -> list:
+    def get_transaction(self, user_id: int, start: datetime, end: datetime, db: Annotated[Session, Depends(get_db)]) -> List[ReportScheme]:
         """Получение транзакции."""
         account = db.query(AccountModel).filter(AccountModel.user_id == user_id).first()
         list_of_trans = db.query(TransactionsModel).filter(
@@ -95,10 +93,13 @@ class Transactions:
             TransactionsModel.created_at <= end
             ).all()
 
-        # Формируем отчет
-        report = [[transaction.amount, transaction.created_at] for transaction in list_of_trans]
+        report = [ReportScheme(
+        amount=transaction.amount,
+        balance_after=transaction.balance_after,
+        created_at=transaction.created_at
+        ) for transaction in list_of_trans]
 
         if report:
             return report
         else:
-            return 'There are no transactions for the specified period'
+            return {'status': 'За определенный промежуток операций не было'}

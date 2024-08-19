@@ -14,7 +14,7 @@ class AccountModel(Base):
     __table_args__ = {"schema": "transaction_ivashko"}
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer) #, ForeignKey('auth_schema_ivashko.users_ivashko.id')
+    user_id = Column(Integer, ForeignKey('auth_schema_ivashko.users_ivashko.id')) #, ForeignKey('auth_schema_ivashko.users_ivashko.id')
     balance = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
     updated_at = Column(TIMESTAMP, default=None)
