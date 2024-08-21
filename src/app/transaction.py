@@ -15,13 +15,13 @@ from fastapi.responses import JSONResponse
 class Transactions:
     """Класс для работы с транзакциями."""
 
-    def create_account(self, id: int, db: Annotated[Session, Depends(get_db)]):
+    def create_account(self, user_id: int, db: Annotated[Session, Depends(get_db)]):
         """Создание аккаунта пользователя."""
         try:
             existing_account = db.query(AccountModel).filter(AccountModel.user_id == id).first()
             if existing_account is None:
                 new_account = AccountModel(
-                    user_id=id,
+                    user_id=user_id,
                     balance=0,
                     created_at=datetime.now(),
                     updated_at=datetime.now()
@@ -106,4 +106,4 @@ class Transactions:
         if report:
             return report
         else:
-            return {'status': 'За определенный промежуток операций не было'}
+           return JSONResponse(content={"status": "За определенный промежуток операций не было"}, status_code=200)
