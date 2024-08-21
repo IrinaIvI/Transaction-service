@@ -23,6 +23,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 from services.transactions.src.app import models
+#from ...transactions.src.app import models
 target_metadata = models.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -74,11 +75,11 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            version_table_schema='transaction_ivashko'
+            version_table='transactions_alembic_version',
+            version_table_schema='ivashko_schema'
         )
 
         with context.begin_transaction():
-            context.execute(text("CREATE SCHEMA IF NOT EXISTS transaction_ivashko"))
             context.run_migrations()
 
 

@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, TIMESTAMP, ForeignKey, BIGINT, Enum, MetaData, String, Boolean
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, TIMESTAMP, ForeignKey, BIGINT, Enum, Table
+#from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
+from ....common_base import Base
+from sqlalchemy.orm import registry
+from .database import engine
 
-metadata = MetaData()
-Base = declarative_base(metadata=metadata)
+mapper_registry = registry()
 
 class TransactionType(PyEnum):
     DEBIT = "DEBIT"
@@ -12,21 +13,26 @@ class TransactionType(PyEnum):
 
 class AccountModel(Base):
     __tablename__ = "account_ivashko"
-    __table_args__ = {"schema": "transaction_ivashko"}
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('auth_schema_ivashko.users_ivashko.id'))
+    user_id = Column(Integer, ForeignKey('ivashko_schema.users_ivashko.id'))
     balance = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
     updated_at = Column(TIMESTAMP, default=None)
 
 class TransactionsModel(Base):
     __tablename__ = "transactions_ivashko"
-    __table_args__ = {"schema": "transaction_ivashko"}
 
     id = Column(Integer, primary_key=True)
-    account_id = Column(Integer, ForeignKey('transaction_ivashko.account_ivashko.id'))
+    account_id = Column(Integer, ForeignKey('ivashko_schema.account_ivashko.id'))
     amount = Column(BIGINT, nullable=False)
     type = Column(Enum(TransactionType), nullable=False)
     balance_after = Column(BIGINT, nullable=False)
     created_at = Column(TIMESTAMP, default=None)
+
+user_table = Table('users_ivashko', Base.metadata, autoload_with=engine, schema='ivashko_schema')
+
+class User:
+    pass
+
+mapper_registry.map_imperatively(User, user_table)
