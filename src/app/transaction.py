@@ -5,10 +5,11 @@ import logging
 from app.models import AccountModel, TransactionsModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from typing import Annotated, Union, List
+from typing import Annotated, List
 from fastapi import Depends, HTTPException
 from app.database import get_db
 from app.schemas import ReportScheme
+from fastapi.responses import JSONResponse
 
 
 class Transactions:
@@ -42,7 +43,7 @@ class Transactions:
         if amount < 0:
             raise HTTPException(status_code=400, detail="Сумма меньше нуля")
 
-        verified_query = text("""SELECT verified FROM auth_schema_ivashko.users_ivashko
+        verified_query = text("""SELECT verified FROM ivashko_schema.users_ivashko
                         WHERE id = :user_id;""")
         result = db.execute(verified_query, {'user_id': user_id})
         verified_user_row = result.fetchone()
@@ -61,7 +62,7 @@ class Transactions:
             raise HTTPException(status_code=400, detail="Недостаточно средств на балансе и пользователь не верифицирован")
 
         update_query = text("""
-            UPDATE transaction_ivashko.account_ivashko
+            UPDATE ivashko_schema.account_ivashko
             SET balance = :new_balance, updated_at = :updated_at
             WHERE user_id = :user_id
         """)
@@ -72,7 +73,7 @@ class Transactions:
         })
 
         insert_transaction_query = text("""
-            INSERT INTO transaction_ivashko.transactions_ivashko
+            INSERT INTO ivashko_schema.transactions_ivashko
             (account_id, amount, "type", balance_after, created_at)
             VALUES (:account_id, :amount, :type, :balance_after, :created_at)
         """)
@@ -84,7 +85,7 @@ class Transactions:
             'created_at': datetime.now()
         })
         db.commit()
-        return {'status': 'Операция корректная'}
+        return JSONResponse(content={"status": "Операция корректная"}, status_code=200)
 
 
     def get_transaction(self, user_id: int, start: datetime, end: datetime, db: Annotated[Session, Depends(get_db)]) -> List[ReportScheme]:

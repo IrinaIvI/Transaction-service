@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, TIMESTAMP, ForeignKey, BIGINT, Enum, Table
 #from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
-from ....common_base import Base
+#from ....common_base import Base
+from common_base import Base
 from sqlalchemy.orm import registry
 from .database import engine
 

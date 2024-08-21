@@ -2,10 +2,9 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, text
 from sqlalchemy import pool
-import os
-import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from alembic import context
 
@@ -22,7 +21,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from services.transactions.src.app import models
+from app import models
 #from ...transactions.src.app import models
 target_metadata = models.Base.metadata
 
