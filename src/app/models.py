@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, TIMESTAMP, ForeignKey, BIGINT, Enum, Table
-#from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, TIMESTAMP, ForeignKey, BIGINT, Enum, Table, MetaData
 from enum import Enum as PyEnum
-#from ....common_base import Base
-from common_base import Base
 from sqlalchemy.orm import registry
+from sqlalchemy.ext.declarative import declarative_base
 from .database import engine
+
+metadata = MetaData(schema="ivashko_schema")
+Base = declarative_base(metadata=metadata)
 
 mapper_registry = registry()
 

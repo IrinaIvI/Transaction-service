@@ -18,7 +18,7 @@ class Transactions:
     def create_account(self, user_id: int, db: Annotated[Session, Depends(get_db)]):
         """Создание аккаунта пользователя."""
         try:
-            existing_account = db.query(AccountModel).filter(AccountModel.user_id == id).first()
+            existing_account = db.query(AccountModel).filter(AccountModel.user_id == user_id).first()
             if existing_account is None:
                 new_account = AccountModel(
                     user_id=user_id,
@@ -39,12 +39,14 @@ class Transactions:
     def create_transaction(self, user_id: int, amount: Decimal, operation: str, db: Annotated[Session, Depends(get_db)]):
         """Создание транзакции."""
         account = db.query(AccountModel).filter(AccountModel.user_id == user_id).one_or_none()
+        if account is None:
+            account = self.create_account(user_id=user_id, db=db)
 
         if amount < 0:
             raise HTTPException(status_code=400, detail="Сумма меньше нуля")
 
         verified_query = text("""SELECT verified FROM ivashko_schema.users_ivashko
-                        WHERE id = :user_id;""")
+                    WHERE id = :user_id;""")
         result = db.execute(verified_query, {'user_id': user_id})
         verified_user_row = result.fetchone()
 
@@ -52,9 +54,8 @@ class Transactions:
             raise HTTPException(status_code=400, detail=f"Пользователь с айди {user_id} не найден")
 
         verified_user = verified_user_row[0]
-        db.commit()
 
-        if operation == 'DEBIT':
+        if operation.upper() == 'DEBIT':
             new_balance = account.balance + amount
         elif account.balance >= amount or verified_user:
             new_balance = account.balance - amount
@@ -80,7 +81,7 @@ class Transactions:
         db.execute(insert_transaction_query, {
             'account_id': account.id,
             'amount': amount,
-            'type': operation,
+            'type': operation.upper(),
             'balance_after': new_balance,
             'created_at': datetime.now()
         })

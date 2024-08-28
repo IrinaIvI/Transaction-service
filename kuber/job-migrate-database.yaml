@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ivashko-migrate-job-transactions
+  namespace: test
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: migrate
+        image: merewhale/transactions-service
+        command: ["poetry", "run", "alembic", "upgrade", "head"]
+        env:
+        - name: PYTHONPATH
+          value: /workspace/src/app
+        - name: POSTGRES_HOST
+          value: http://postgres-service:5432
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: POSTGRES_DB
+          value: iivashko
+      restartPolicy: Never
