@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: transaction-service
-        image: merewhale/transactions-service
+        image: merewhale/transactions-service:1.0.0
         env:
         - name: PYTHONPATH
           value: /workspace/src/app

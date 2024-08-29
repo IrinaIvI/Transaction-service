@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: migrate
-        image: merewhale/transactions-service
+        image: merewhale/transactions-service:1.0.0
         command: ["poetry", "run", "alembic", "upgrade", "head"]
         env:
         - name: PYTHONPATH
