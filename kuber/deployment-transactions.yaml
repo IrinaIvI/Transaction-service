@@ -19,20 +19,24 @@ spec:
         env:
         - name: PYTHONPATH
           value: /workspace/src/app
-        - name: POSTGRES_HOST
-          value: http://postgres-service:5432
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_NAME
+          value: postgres-service
+          #value: http://postgres-service:5432
         - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-user
+          value: username
+          # valueFrom:
+          #   secretKeyRef:
+          #     name: postgres-secret
+          #     key: postgres-user
         - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
+          value: password
+          # valueFrom:
+          #   secretKeyRef:
+          #     name: postgres-secret
+          #     key: postgres-password
         - name: POSTGRES_DB
           value: iivashko
         ports:
         - containerPort: 8002
-

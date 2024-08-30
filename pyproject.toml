@@ -11,7 +11,7 @@ fastapi = "^0.111.1"
 uvicorn = "^0.30.5"
 alembic = "^1.13.2"
 psycopg2-binary = "^2.9.9"
-sqlalchemy-utils = "^0.41.2"
+psycopg = "^3.2.1"
 
 [tool.poetry.group.dev.dependencies]
 wemake-python-styleguide = "^0.19.2"
