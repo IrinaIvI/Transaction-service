@@ -21,21 +21,18 @@ spec:
           value: /workspace/src/app
         - name: POSTGRES_PORT
           value: "5432"
-        - name: POSTGRES_NAME
-          value: postgres-service
-          #value: http://postgres-service:5432
+        - name: POSTGRES_HOST
+          value: http://postgres-service:5432
         - name: POSTGRES_USER
-          value: username
-          # valueFrom:
-          #   secretKeyRef:
-          #     name: postgres-secret
-          #     key: postgres-user
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
         - name: POSTGRES_PASSWORD
-          value: password
-          # valueFrom:
-          #   secretKeyRef:
-          #     name: postgres-secret
-          #     key: postgres-password
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
         - name: POSTGRES_DB
           value: iivashko
         ports:
