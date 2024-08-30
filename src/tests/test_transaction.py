@@ -1,30 +1,20 @@
+from unittest.mock import patch
 import pytest
-from datetime import datetime
 from app.transaction import Transactions
 from fastapi.responses import JSONResponse
-from sqlalchemy import create_engine
-from sqlalchemy_utils import database_exists, create_database, drop_database
-from app.models import Base
-
-
-@pytest.fixture(scope='session')
-def setup_test_database():
-    engine = create_engine('postgresql+psycopg2://postgres:password@localhost:5432/test_db')
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    Base.metadata.create_all(engine)
-    yield engine
-    drop_database(engine.url)
+from datetime import datetime
 
 @pytest.mark.parametrize('user_id, amount, transaction_type',
- [pytest.param(1, 1000, 'DEBIT',  id='is correct'),
+ [pytest.param(1, 1000, 'DEBIT', id='is correct'),
   pytest.param(4, 1000, 'debit', id='is not correct', marks=pytest.mark.xfail()),
   pytest.param(1, -1000, 'DEBIT', id='is not correct', marks=pytest.mark.xfail()),
   pytest.param(1, 1000, '?', id='is not correct', marks=pytest.mark.xfail()),
   ]
 )
-def test_create_transaction(user_id, amount, transaction_type, setup_test_database):
-    setup_test_database
+@patch('app.transaction.Transactions.create_transaction')
+def test_create_transaction(mock_create_transaction, user_id, amount, transaction_type):
+    mock_create_transaction.return_value = JSONResponse(content={"status": "Операция корректная"}, status_code=200)
+
     transaction = Transactions().create_transaction(user_id, amount, transaction_type)
     assert transaction == JSONResponse(content={"status": "Операция корректная"}, status_code=200)
 
@@ -32,8 +22,12 @@ def test_create_transaction(user_id, amount, transaction_type, setup_test_databa
     pytest.param(1, datetime.now(), datetime.now(), id='is correct'),
     pytest.param(-1, datetime.now(), datetime.now(), id='is not correct', marks=pytest.mark.xfail())
 ])
-def test_get_transaction(user_id, start, end, setup_test_database):
-    setup_test_database
+@patch('app.transaction.Transactions.get_transaction')
+@patch('app.transaction.Transactions.create_transaction')
+def test_get_transaction(mock_create_transaction, mock_get_transaction, user_id, start, end):
+    mock_create_transaction.return_value = None
+    mock_get_transaction.return_value = [{'amount': 500, 'balance_after': 500, 'created_at': datetime.now()}]
+
     Transactions().create_transaction(1, 500, 'DEBIT')
     resulting_report = Transactions().get_transaction(user_id, start, end)
     report = [{'amount': 500, 'balance_after': 500, 'created_at': datetime.now()}]

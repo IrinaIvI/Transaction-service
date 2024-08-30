@@ -23,4 +23,6 @@ COPY alembic.ini /app
 COPY migrations /app/migrations
 COPY ./src /app
 
+ENV PYTHONPATH=/app/src
+
 ENTRYPOINT ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
