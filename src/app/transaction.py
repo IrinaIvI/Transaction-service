@@ -1,15 +1,16 @@
-#from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 import logging
-from app.models import AccountModel, TransactionsModel
+from typing import List, Annotated
+
+from fastapi import Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from typing import Annotated, List
-from fastapi import Depends, HTTPException
+
 from app.database import get_db
+from app.models import AccountModel, TransactionsModel
 from app.schemas import ReportScheme
-from fastapi.responses import JSONResponse
 
 
 class Transactions:
@@ -28,9 +29,9 @@ class Transactions:
                 )
                 db.add(new_account)
                 db.commit()
-                logging.info(f"Создан новый аккаунт для пользователя {id} с балансом 0")
+                logging.info(f"Создан новый аккаунт для пользователя {user_id} с балансом 0")
             else:
-                logging.info(f"Аккаунт для пользователя {id} уже существует")
+                logging.info(f"Аккаунт для пользователя {user_id} уже существует")
         except Exception as e:
             db.rollback()
             logging.error(f"Ошибка при создании аккаунта: {e}")
@@ -45,8 +46,10 @@ class Transactions:
         if amount < 0:
             raise HTTPException(status_code=400, detail="Сумма меньше нуля")
 
-        verified_query = text("""SELECT verified FROM ivashko_schema.users_ivashko
-                    WHERE id = :user_id;""")
+        verified_query = text("""
+            SELECT verified FROM ivashko_schema.users_ivashko
+            WHERE id = :user_id;
+        """)
         result = db.execute(verified_query, {'user_id': user_id})
         verified_user_row = result.fetchone()
 
@@ -75,7 +78,7 @@ class Transactions:
 
         insert_transaction_query = text("""
             INSERT INTO ivashko_schema.transactions_ivashko
-            (account_id, amount, "type", balance_after, created_at)
+            (account_id, amount, type, balance_after, created_at)
             VALUES (:account_id, :amount, :type, :balance_after, :created_at)
         """)
         db.execute(insert_transaction_query, {
@@ -88,7 +91,6 @@ class Transactions:
         db.commit()
         return JSONResponse(content={"status": "Операция корректная"}, status_code=200)
 
-
     def get_transaction(self, user_id: int, start: datetime, end: datetime, db: Annotated[Session, Depends(get_db)]) -> List[ReportScheme]:
         """Получение транзакции."""
         account = db.query(AccountModel).filter(AccountModel.user_id == user_id).first()
@@ -96,15 +98,15 @@ class Transactions:
             TransactionsModel.account_id == account.id,
             TransactionsModel.created_at >= start,
             TransactionsModel.created_at <= end
-            ).all()
+        ).all()
 
         report = [ReportScheme(
-        amount=transaction.amount,
-        balance_after=transaction.balance_after,
-        created_at=transaction.created_at
+            amount=transaction.amount,
+            balance_after=transaction.balance_after,
+            created_at=transaction.created_at
         ) for transaction in list_of_trans]
 
         if report:
             return report
         else:
-           return JSONResponse(content={"status": "За определенный промежуток операций не было"}, status_code=200)
+            return JSONResponse(content={"status": "За определенный промежуток операций не было"}, status_code=200)
